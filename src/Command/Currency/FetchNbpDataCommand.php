@@ -2,11 +2,12 @@
 
 namespace App\Command\Currency;
 
+use App\Service\Currency\FetchNbpDataService;
+use App\Service\Currency\SaveNbpDataService;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -16,33 +17,28 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class FetchNbpDataCommand extends Command
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly FetchNbpDataService $fetchNbpDataService,
+        private readonly SaveNbpDataService $saveNbpDataService,
+    ) {
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $arg1 = $input->getArgument('arg1');
 
-        if ($arg1) {
-            $io->note(sprintf('You passed an argument: %s', $arg1));
+        try {
+            $NbpDataArray = $this->fetchNbpDataService->fetchApiData();
+        } catch (Exception $exception) {
+            $io->error('An error occurred while fetching NBP data: ' . $exception->getMessage());
+
+            return Command::FAILURE;
         }
 
-        if ($input->getOption('option1')) {
-            // ...
-        }
+        $this->saveNbpDataService->saveNbpData($NbpDataArray[0]['rates']);
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        $io->success('NBP data fetched and saved into the database.');
 
         return Command::SUCCESS;
     }
