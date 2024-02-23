@@ -13,7 +13,7 @@ class SaveNbpDataService
     ) {
     }
 
-    public function saveNbpData(array $data): void
+    public function saveData(array $data): void
     {
         $currencyRepository = $this->entityManager->getRepository(Currency::class);
 
