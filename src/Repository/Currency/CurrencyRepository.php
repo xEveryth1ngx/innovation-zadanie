@@ -24,7 +24,7 @@ class CurrencyRepository extends ServiceEntityRepository
         public function findOneByCode($code): ?Currency
         {
             return $this->createQueryBuilder('c')
-                ->andWhere('c.exampleField = :code')
+                ->andWhere('c.currencyCode = :code')
                 ->setParameter('code', $code)
                 ->getQuery()
                 ->getOneOrNullResult()
