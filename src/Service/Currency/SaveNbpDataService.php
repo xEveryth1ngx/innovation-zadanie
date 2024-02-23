@@ -2,40 +2,34 @@
 
 namespace App\Service\Currency;
 
+use App\DTO\Currency\NbpApiCurrencyDto;
 use App\Entity\Currency\Currency;
-use App\Interface\Currency\SaveApiDataInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class SaveNbpDataService implements SaveApiDataInterface
+readonly class SaveNbpDataService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
-    public function saveData(array $data): void
+    public function saveData(NbpApiCurrencyDto ...$data): void
     {
         $currencyRepository = $this->entityManager->getRepository(Currency::class);
 
-        foreach ($data as $currency) {
-            $currencyName = $currency['currency'];
-            $currencyCode = $currency['code'];
-            $exchangeRate = $currency['mid'];
-
-            $currencyObject = $currencyRepository->findOneByCode($currencyCode);
+        foreach ($data as $currencyDTO) {
+            $currencyObject = $currencyRepository->findOneByCode($currencyDTO->currencyCode);
 
             if (!$currencyObject) {
                 $currencyObject = new Currency();
 
-                $currencyObject->setName($currencyName);
-                $currencyObject->setCurrencyCode($currencyCode);
+                $currencyObject->setName($currencyDTO->currencyName);
+                $currencyObject->setCurrencyCode($currencyDTO->currencyCode);
             }
 
-            $currencyObject->setExchangeRate($exchangeRate);
+            $currencyObject->setExchangeRate($currencyDTO->exchangeRate);
 
             $this->entityManager->persist($currencyObject);
         }
-
-        $this->entityManager->flush();
     }
 }
