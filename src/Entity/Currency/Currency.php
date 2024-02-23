@@ -3,6 +3,7 @@
 namespace App\Entity\Currency;
 
 use App\Repository\Currency\CurrencyRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CurrencyRepository::class)]
@@ -19,8 +20,8 @@ class Currency
     #[ORM\Column(length: 255)]
     private ?string $currencyCode = null;
 
-    #[ORM\Column]
-    private ?int $exchangeRate = null;
+    #[ORM\Column(length: 255)]
+    private ?string $exchangeRate = null;
 
     public function getId(): ?int
     {
@@ -51,12 +52,12 @@ class Currency
         return $this;
     }
 
-    public function getExchangeRate(): ?int
+    public function getExchangeRate(): ?string
     {
         return $this->exchangeRate;
     }
 
-    public function setExchangeRate(int $exchangeRate): static
+    public function setExchangeRate(string $exchangeRate): static
     {
         $this->exchangeRate = $exchangeRate;
 
