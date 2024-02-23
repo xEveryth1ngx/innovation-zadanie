@@ -36,7 +36,7 @@ class FetchNbpDataCommand extends Command
             return Command::FAILURE;
         }
 
-        $this->saveNbpDataService->saveNbpData($NbpDataArray[0]['rates']);
+        $this->saveNbpDataService->saveData($NbpDataArray[0]['rates']);
 
         $io->success('NBP data fetched and saved into the database.');
 
