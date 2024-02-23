@@ -24,15 +24,18 @@ class SaveNbpDataService
 
             $currencyObject = $currencyRepository->findOneByCode($currencyCode);
 
-            if ($currencyObject) {
-                $currencyObject->setExchangeRate($exchangeRate);
-            } else {
+            if (!$currencyObject) {
                 $currencyObject = new Currency();
 
                 $currencyObject->setName($currencyName);
                 $currencyObject->setCurrencyCode($currencyCode);
-                $currencyObject->setExchangeRate($exchangeRate);
             }
+
+            $currencyObject->setExchangeRate($exchangeRate);
+
+            $this->entityManager->persist($currencyObject);
         }
+
+        $this->entityManager->flush();
     }
 }
