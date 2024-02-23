@@ -3,10 +3,10 @@
 namespace App\Service\Currency;
 
 use App\Entity\Currency\Currency;
-use App\Repository\Currency\CurrencyRepository;
+use App\Interface\Currency\SaveApiDataInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-class SaveNbpDataService
+class SaveNbpDataService implements SaveApiDataInterface
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
