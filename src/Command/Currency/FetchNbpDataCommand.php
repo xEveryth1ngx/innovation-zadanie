@@ -2,9 +2,11 @@
 
 namespace App\Command\Currency;
 
+use App\Exception\NbpApiBadRequestException;
+use App\Exception\NbpApiResourceNotFoundException;
 use App\Service\Currency\FetchNbpDataService;
 use App\Service\Currency\SaveNbpDataService;
-use Exception;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +22,7 @@ class FetchNbpDataCommand extends Command
     public function __construct(
         private readonly FetchNbpDataService $fetchNbpDataService,
         private readonly SaveNbpDataService $saveNbpDataService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
     }
@@ -30,13 +33,14 @@ class FetchNbpDataCommand extends Command
 
         try {
             $NbpDataArray = $this->fetchNbpDataService->fetchApiData();
-        } catch (Exception $exception) {
+        } catch (NbpApiResourceNotFoundException|NbpApiBadRequestException $exception) {
             $io->error('An error occurred while fetching NBP data: ' . $exception->getMessage());
 
             return Command::FAILURE;
         }
 
-        $this->saveNbpDataService->saveData($NbpDataArray[0]['rates']);
+        $this->saveNbpDataService->saveData(...$NbpDataArray);
+        $this->entityManager->flush();
 
         $io->success('NBP data fetched and saved into the database.');
 

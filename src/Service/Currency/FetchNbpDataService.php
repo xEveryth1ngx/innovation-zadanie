@@ -2,16 +2,12 @@
 
 namespace App\Service\Currency;
 
+use App\DTO\Currency\NbpApiCurrencyDto;
 use App\Exception\NbpApiBadRequestException;
 use App\Exception\NbpApiResourceNotFoundException;
 use App\Interface\Currency\FetchApiDataInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class FetchNbpDataService implements FetchApiDataInterface
@@ -26,6 +22,7 @@ class FetchNbpDataService implements FetchApiDataInterface
     }
 
     /**
+     * @return array<int, NbpApiCurrencyDto>
      * @throws NbpApiResourceNotFoundException
      * @throws NbpApiBadRequestException
      */
@@ -40,6 +37,15 @@ class FetchNbpDataService implements FetchApiDataInterface
             throw new NbpApiBadRequestException('Bad request.');
         }
 
-        return $response->toArray();
+        $currencyData = $response->toArray();
+
+        return array_map(
+            fn (array $currency) => new NbpApiCurrencyDto(
+                $currency['currency'],
+                $currency['code'],
+                $currency['mid'],
+            ),
+            $currencyData[0]['rates']
+        );
     }
 }
